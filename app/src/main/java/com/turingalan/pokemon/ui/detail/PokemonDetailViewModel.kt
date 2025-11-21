@@ -16,18 +16,14 @@ import javax.inject.Inject
 
 data class DetailUiState(
     val name:String = "",
-    val artwork:String? = null
+    val artwork:String? = ""
 )
-
-
 @HiltViewModel
 class PokemonDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val pokemonRepository: PokemonRepository
 
 ): ViewModel() {
-
-
     private val _uiState: MutableStateFlow<DetailUiState> =
         MutableStateFlow(DetailUiState())
     val uiState: StateFlow<DetailUiState>
@@ -40,15 +36,13 @@ class PokemonDetailViewModel @Inject constructor(
             val pokemon = pokemonRepository.readOne(pokemonId)
 
             pokemon?.let {
-                _uiState.value = pokemon.toDetailUiState()
+                _uiState.value = pokemon.getOrNull()!!.toDetailUiState()
             }
         }
     }
-
 }
 
 fun Pokemon.toDetailUiState(): DetailUiState = DetailUiState(
     name = this.name,
     artwork = this.artwork,
 )
-

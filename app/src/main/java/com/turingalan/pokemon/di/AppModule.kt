@@ -1,6 +1,7 @@
 package com.turingalan.pokemon.di
 
-import com.turingalan.pokemon.data.remote.PokemonDataSource
+import com.turingalan.pokemon.data.PokemonDataSource
+import com.turingalan.pokemon.data.local.PokemonLocalDataSource
 import com.turingalan.pokemon.data.remote.PokemonRemoteDataSource
 import com.turingalan.pokemon.data.repository.PokemonRepository
 import com.turingalan.pokemon.data.repository.PokemonRepositoryImpl
@@ -8,6 +9,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
@@ -16,7 +18,13 @@ abstract class AppModule {
 
     @Binds
     @Singleton
-    abstract fun pokemonDataSource(ds: PokemonRemoteDataSource): PokemonDataSource
+    @RemoteDataSource
+    abstract fun bindsRemotePokemonDataSource(ds: PokemonRemoteDataSource): PokemonDataSource
+
+    @Binds
+    @Singleton
+    @LocalDataSource
+    abstract fun bindsLocalPokemonDataSource(ds: PokemonLocalDataSource): PokemonDataSource
 
     @Binds
     @Singleton
@@ -25,3 +33,11 @@ abstract class AppModule {
     //abstract fun bindPokemonRepository(repository: PokemonFakeRemoteRepository): PokemonRepository
     //abstract fun bindPokemonRepository(repository: PokemonInMemoryRepository): PokemonRepository
 }
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class LocalDataSource
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class RemoteDataSource

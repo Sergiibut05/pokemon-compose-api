@@ -21,23 +21,29 @@ class PokemonListViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val repository: PokemonRepository
 ): ViewModel() {
-
-
     private val _uiState: MutableStateFlow<ListUiState > =
         MutableStateFlow(value = ListUiState.Initial)
-
     val uiState: StateFlow<ListUiState>
         get() = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
             _uiState.value = ListUiState.Loading
-            val allPokemon = repository.readAll()
-            val successResponse = ListUiState.Success(
-                allPokemon.asListUiState()
-            )
-
-            _uiState.value = successResponse
+            repository.observe().collect { result ->
+                if (result.isSuccess) {
+                    val successResponse = ListUiState.Success(result.getOrNull()!!.asListUiState())
+                    _uiState.value = successResponse
+                }
+                else {
+                    _uiState.value = ListUiState.Error
+                }
+            }
+//            val allPokemon = repository.readAll()
+//            val successResponse = ListUiState.Success(
+//                allPokemon.asListUiState()
+//            )
+//
+//            _uiState.value = successResponse
         }
 
     }
@@ -47,6 +53,7 @@ class PokemonListViewModel @Inject constructor(
 sealed class ListUiState {
     object Initial: ListUiState()
     object Loading: ListUiState()
+    object Error: ListUiState()
     data class Success(
         val pokemons: List<ListItemUiState>
     ): ListUiState()
@@ -55,7 +62,7 @@ sealed class ListUiState {
 data class ListItemUiState(
     val id: Long, // Aunque luego no aparezca en la UI
     val name: String,
-    val sprite:String,
+    val sprite: String,
 )
 
 
@@ -63,12 +70,9 @@ fun Pokemon.asListItemUiState(): ListItemUiState {
 
     return ListItemUiState(
         id = this.id,
-        name = this.name,
+        name = this.name.replaceFirstChar { it.uppercase() },
         sprite = this.sprite
     )
 }
 fun List<Pokemon>.asListUiState():List<ListItemUiState>
-= this.map(Pokemon::asListItemUiState)
-
-
-
+        = this.map(Pokemon::asListItemUiState)

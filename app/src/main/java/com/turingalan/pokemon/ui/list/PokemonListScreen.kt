@@ -21,22 +21,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-
-
 @Composable
 fun PokemonListScreen(
     modifier: Modifier = Modifier,
     viewModel: PokemonListViewModel = hiltViewModel(),
     onShowDetail:(Long)->Unit,
 ) {
-
     val uiState by viewModel.uiState.collectAsState()
-
     when(uiState) {
         is ListUiState.Initial -> {
 
@@ -47,8 +44,23 @@ fun PokemonListScreen(
         is ListUiState.Success -> {
             PokemonList(modifier, uiState, onShowDetail)
         }
+        is ListUiState.Error -> {
+            PokemonError()
+        }
     }
+}
 
+@Composable
+private fun PokemonError(
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Se ha producido un error", style = MaterialTheme.typography.titleLarge)
+    }
 }
 
 @Composable
@@ -96,17 +108,19 @@ private fun PokemonList(
 
 @Composable
 fun PokemonListItemCard(
-
-    modifier:Modifier = Modifier,
+    modifier: Modifier = Modifier,
     pokemonId: Long,
-    name:String,
-    sprite:String,
+    name: String,
+    sprite: String,
     onShowDetail: (Long) -> Unit,
 )
 {
     Card(
-        modifier = Modifier.fillMaxWidth().height(128.dp)
-            .clickable(enabled = true,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(128.dp)
+            .clickable(
+                enabled = true,
                 onClick = {
                     onShowDetail(pokemonId)
                 })
@@ -116,8 +130,10 @@ fun PokemonListItemCard(
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             AsyncImage(
+                modifier = Modifier.size(64.dp),
                 model = sprite,
                 contentDescription = name,
+                contentScale = ContentScale.Fit
             )
             Text(text= name,
                 style = MaterialTheme.typography.headlineSmall)
