@@ -45,6 +45,14 @@ android {
 }
 
 dependencies {
+    //room
+    implementation("androidx.room:room-runtime:2.8.4")
+
+    // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)
+    // See Add the KSP plugin to your project
+    ksp("androidx.room:room-compiler:2.8.4")
+    // Kotlin Extensions and Coroutines support for Room
+    implementation("androidx.room:room-ktx:2.8.4")
 
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")

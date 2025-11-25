@@ -3,42 +3,50 @@ package com.turingalan.pokemon.data.local
 import com.turingalan.pokemon.data.PokemonDataSource
 import com.turingalan.pokemon.data.model.Pokemon
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class PokemonLocalDataSource @Inject constructor(
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val pokemonDao: PokemonDao
 ): PokemonDataSource {
-
-    private val _pokemon: MutableList<Pokemon> = mutableListOf()
-    private val _pokemonFlow: MutableSharedFlow<Result<List<Pokemon>>> = MutableSharedFlow()
-
     override suspend fun addAll(pokemonList: List<Pokemon>) {
-        _pokemon.addAll(pokemonList)
-        _pokemonFlow.emit(Result.success(_pokemon.toList()))
+        pokemonList.forEach {
+            pokemon ->
+                val entity = pokemon.toEntity()
+                withContext(Dispatchers.IO) {
+                    pokemonDao.insert(entity)
+                }
+
+        }
     }
 
     override fun observe(): Flow<Result<List<Pokemon>>> {
-        scope.launch {
-            val success = Result.success(_pokemon)
-            _pokemonFlow.emit(success)
+        val databaseFlow = pokemonDao.observeAll()
+        return databaseFlow.map{
+            entities ->
+                Result.success(entities.toModel())
         }
-        return _pokemonFlow
     }
 
     override suspend fun readAll(): Result<List<Pokemon>> {
-        return Result.success(_pokemon.toList())
+        val result = Result.success(pokemonDao.getAll().toModel())
+        return result
     }
 
     override suspend fun readOne(id: Long): Result<Pokemon> {
-        val pokemon = _pokemon.firstOrNull { pokemon ->
-            pokemon.id == id
+        val entity = pokemonDao.readPokemonById(id)
+        return if(entity==null){
+            Result.failure(PokemonNotFoundException())
         }
-        pokemon?.let {
-            return Result.success(it)
-        }
-        return Result.failure(RuntimeException())
+        else
+            Result.success(entity.toModel())
+
     }
+
 }
