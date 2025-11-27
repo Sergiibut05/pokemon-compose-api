@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.serialize)
-
 }
 
 android {
@@ -44,21 +43,25 @@ android {
     }
 }
 
+// Añadimos esta configuración para KSP
+ksp {
+    arg("room.generateKotlin", "true")
+}
+
 dependencies {
-    //room
-    implementation("androidx.room:room-runtime:2.8.4")
+    //Coil
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
-    // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)
-    // See Add the KSP plugin to your project
-    ksp("androidx.room:room-compiler:2.8.4")
-    // Kotlin Extensions and Coroutines support for Room
-    implementation("androidx.room:room-ktx:2.8.4")
+    //Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 
-    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
+    //Room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
 
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
     //Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
@@ -66,6 +69,7 @@ dependencies {
 
     // View Model
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+
     // Navigation
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
@@ -85,4 +89,5 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.kotlinx.coroutines.core)
 }
