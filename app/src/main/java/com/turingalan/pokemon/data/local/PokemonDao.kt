@@ -3,6 +3,7 @@ package com.turingalan.pokemon.data.local
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
@@ -18,13 +19,14 @@ interface PokemonDao {
 
     /**
      * Inserta una fila en la tabla.
-     * @suspend: IMPORTANTE. Las operaciones de base de datos son "bloqueantes" (tardan tiempo).
-     * La palabra clave 'suspend' obliga a ejecutar esto dentro de una Corrutina (hilo secundario),
-     * evitando que la app se congele (ANR).
      *
-     * Retorna Long: El ID de la fila recién insertada.
+     * [FIX DE ERROR - onConflict]:
+     * Agregamos 'onConflict = OnConflictStrategy.REPLACE'.
+     * Esto significa que si intentamos insertar un Pokémon que YA tiene ese ID,
+     * Room borrará el viejo y pondrá el nuevo en su lugar.
+     * Sin esto, la app se cierra (crashea) por violación de llave primaria (UNIQUE constraint failed).
      */
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(pokemon: PokemonEntity): Long
 
     /**

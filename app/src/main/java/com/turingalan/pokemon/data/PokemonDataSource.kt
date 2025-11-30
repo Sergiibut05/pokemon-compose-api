@@ -39,7 +39,7 @@ interface PokemonDataSource {
     suspend fun readOne(id: Long): Result<Pokemon>
 
     /**
-     * Función auxiliar para manejo de errores (parece experimental en tu código).
+     * Función auxiliar para manejo de errores (parece experimental en tu código).-
      */
     suspend fun isError()
 }
